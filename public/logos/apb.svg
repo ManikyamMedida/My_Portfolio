@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect x="4" y="10" width="56" height="44" rx="12" fill="#0091BD"/>
+  <path d="M12 43h40" stroke="#BAE6FD" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M46 39l6 4-6 4" stroke="#4ADE80" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="32" y="33" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-weight="900" font-size="17" letter-spacing="0.5">APB</text>
+</svg>
