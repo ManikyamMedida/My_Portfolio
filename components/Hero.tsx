@@ -5,11 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
   m,
-  useMotionValue,
   useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
 } from "framer-motion";
 import { ArrowUpRight, Play } from "lucide-react";
 import { profile } from "@/lib/data";
@@ -35,29 +31,8 @@ export default function Hero({ portraitSrc = null }: HeroProps) {
   const [osReduced, setOsReduced] = useState(false);
   const [motionOverride, setMotionOverride] = useState<MotionOverride>(null);
   const [isCompact, setIsCompact] = useState(false);
-  const [hasFinePointer, setHasFinePointer] = useState(false);
   const [mountTubes, setMountTubes] = useState(false);
   const [tubesReady, setTubesReady] = useState(false);
-
-  // Pointer parallax motion values + springs (disabled on touch devices & reduced motion)
-  const rawPx = useMotionValue(0);
-  const rawPy = useMotionValue(0);
-  const rawRot = useMotionValue(0);
-  const rawGx = useMotionValue(0);
-  const rawGy = useMotionValue(0);
-
-  const portraitX = useSpring(rawPx, PARALLAX_SPRING);
-  const portraitY = useSpring(rawPy, PARALLAX_SPRING);
-  const portraitRotate = useSpring(rawRot, PARALLAX_SPRING);
-  const glowX = useSpring(rawGx, PARALLAX_SPRING);
-  const glowY = useSpring(rawGy, PARALLAX_SPRING);
-
-  // Scroll drift: portrait drifts up 40px over the hero's height
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const scrollDriftY = useTransform(scrollYProgress, [0, 1], [0, -40]);
 
   // Mount Three.js TubesBackground after window load + requestIdleCallback
   useEffect(() => {
@@ -115,71 +90,20 @@ export default function Hero({ portraitSrc = null }: HeroProps) {
 
     const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
     const compactMql = window.matchMedia("(max-width: 1100px)");
-    const fineMql = window.matchMedia("(hover: hover) and (pointer: fine)");
 
     const syncMotion = () => setOsReduced(mql.matches);
     const syncCompact = () => setIsCompact(compactMql.matches);
-    const syncFine = () => setHasFinePointer(fineMql.matches);
 
     syncMotion();
     syncCompact();
-    syncFine();
 
     mql.addEventListener("change", syncMotion);
     compactMql.addEventListener("change", syncCompact);
-    fineMql.addEventListener("change", syncFine);
     return () => {
       mql.removeEventListener("change", syncMotion);
       compactMql.removeEventListener("change", syncCompact);
-      fineMql.removeEventListener("change", syncFine);
     };
   }, []);
-
-  useEffect(() => {
-    if (reduce || !hasFinePointer) {
-      rawPx.set(0);
-      rawPy.set(0);
-      rawRot.set(0);
-      rawGx.set(0);
-      rawGy.set(0);
-      return;
-    }
-
-    const onPointerMove = (e: PointerEvent) => {
-      if (
-        e.pointerType &&
-        e.pointerType !== "mouse" &&
-        e.pointerType !== "pen"
-      ) {
-        return;
-      }
-      const w = Math.max(window.innerWidth, 1);
-      const h = Math.max(window.innerHeight, 1);
-      const nx = Math.max(-1, Math.min(1, (e.clientX / w) * 2 - 1));
-      const ny = Math.max(-1, Math.min(1, (e.clientY / h) * 2 - 1));
-
-      rawPx.set(-nx * 10);
-      rawPy.set(-ny * 10);
-      rawRot.set(-nx * 0.4);
-      rawGx.set(-nx * 18);
-      rawGy.set(-ny * 18);
-    };
-
-    const onPointerLeave = () => {
-      rawPx.set(0);
-      rawPy.set(0);
-      rawRot.set(0);
-      rawGx.set(0);
-      rawGy.set(0);
-    };
-
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    document.addEventListener("pointerleave", onPointerLeave);
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      document.removeEventListener("pointerleave", onPointerLeave);
-    };
-  }, [reduce, hasFinePointer, rawPx, rawPy, rawRot, rawGx, rawGy]);
 
   const effectiveMode: "full" | "calm" =
     motionOverride ?? (osReduced ? "calm" : "full");
@@ -249,11 +173,7 @@ export default function Hero({ portraitSrc = null }: HeroProps) {
         {/* RIGHT ZONE: PORTRAIT CUTOUT */}
         <div className="hero-portrait-zone">
           {/* Warm radial rim glow behind shoulders & head */}
-          <m.div
-            className="hero-portrait-glow-pos"
-            style={reduce ? undefined : { x: glowX, y: glowY }}
-            aria-hidden="true"
-          >
+          <div className="hero-portrait-glow-pos" aria-hidden="true">
             <m.span
               className="hero-portrait-glow"
               animate={reduce ? undefined : { opacity: [0.8, 1, 0.8] }}
@@ -263,22 +183,12 @@ export default function Hero({ portraitSrc = null }: HeroProps) {
                   : { duration: 6, repeat: Infinity, ease: "easeInOut" }
               }
             />
-          </m.div>
+          </div>
 
-          {/* Scroll drift container -> entrance -> pointer parallax */}
-          <m.div
-            className="hero-portrait-scroll"
-            style={reduce ? undefined : { y: scrollDriftY }}
-          >
+          {/* Entrance container */}
+          <div className="hero-portrait-scroll">
             <div className="hero-portrait-enter hero-lcp-rise">
-              <m.div
-                className="hero-portrait-frame"
-                style={
-                  reduce
-                    ? undefined
-                    : { x: portraitX, y: portraitY, rotate: portraitRotate }
-                }
-              >
+              <div className="hero-portrait-frame">
                 {portraitSrc ? (
                   <div className="hero-portrait-organic-wrap">
                     <Image
@@ -348,9 +258,9 @@ export default function Hero({ portraitSrc = null }: HeroProps) {
                 )}
 
                 <span className="hero-portrait-grain" aria-hidden="true" />
-              </m.div>
+              </div>
             </div>
-          </m.div>
+          </div>
         </div>
       </div>
 
