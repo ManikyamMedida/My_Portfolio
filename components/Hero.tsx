@@ -280,17 +280,21 @@ export default function Hero({ portraitSrc = null }: HeroProps) {
                 }
               >
                 {portraitSrc ? (
-                  <Image
-                    src={portraitSrc}
-                    alt={profile.name}
-                    width={840}
-                    height={1050}
-                    priority
-                    sizes="(min-width:1100px) 42vw, 80vw"
-                    placeholder="blur"
-                    blurDataURL={BLUR_DATA_URL}
-                    className={`hero-portrait-img${isJpg ? " is-jpg" : ""}`}
-                  />
+                  <div className="hero-portrait-organic-wrap">
+                    <Image
+                      src={portraitSrc}
+                      alt={profile.name}
+                      width={894}
+                      height={1202}
+                      priority
+                      sizes="(min-width:1100px) 42vw, 80vw"
+                      placeholder="blur"
+                      blurDataURL={BLUR_DATA_URL}
+                      className="hero-portrait-img"
+                    />
+                    <div className="hero-portrait-aura" aria-hidden="true" />
+                    <div className="hero-portrait-edge-blend" aria-hidden="true" />
+                  </div>
                 ) : (
                   <svg
                     className="hero-portrait-img hero-portrait-silhouette"
@@ -343,18 +347,6 @@ export default function Hero({ portraitSrc = null }: HeroProps) {
                   </svg>
                 )}
 
-                {isJpg && (
-                  <>
-                    <span
-                      className="hero-portrait-fade-bottom"
-                      aria-hidden="true"
-                    />
-                    <span
-                      className="hero-portrait-fade-left"
-                      aria-hidden="true"
-                    />
-                  </>
-                )}
                 <span className="hero-portrait-grain" aria-hidden="true" />
               </m.div>
             </div>
